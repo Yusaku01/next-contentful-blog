@@ -52,7 +52,7 @@ function extractPost(fetchResponse: any): any {
 }
 
 function extractPostEntries(fetchResponse: any): any[] {
-  return fetchResponse?.data?.postCollection?.items;
+  return fetchResponse?.data?.postCollection?.items ?? [];
 }
 
 export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
