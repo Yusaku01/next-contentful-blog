@@ -42,3 +42,10 @@ next-env.d.ts
 # AI
 .claude/
 CLAUDE.md
+
+# notes
+contentful-data.md
+
+# dummy data
+contentful-assets/
+lib/dummy-content.json
