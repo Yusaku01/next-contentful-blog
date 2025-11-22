@@ -56,6 +56,12 @@ async function fetchGraphQL(
   preview = false,
   tag = "posts"
 ): Promise<any> {
+  const isDev = process.env.NODE_ENV === "development";
+
+  const fetchOptions = isDev
+    ? { cache: "no-store" as const }
+    : { next: { tags: [tag] } };
+
   return fetch(
     `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
     {
@@ -69,7 +75,7 @@ async function fetchGraphQL(
         }`,
       },
       body: JSON.stringify({ query }),
-      next: { tags: [tag] },
+      ...fetchOptions,
     }
   ).then((response) => response.json());
 }
