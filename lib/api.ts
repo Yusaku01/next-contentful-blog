@@ -192,9 +192,25 @@ export async function getNewsWithAdjacent(
   slug: string,
   preview: boolean
 ): Promise<any> {
-  const list = await getAllNews(preview);
+  const [currentResponse, list] = await Promise.all([
+    fetchGraphQL(
+      `query {
+        noticeCollection(where: { slug: "${slug}" }, preview: ${
+          preview ? "true" : "false"
+        }, limit: 1) {
+          items {
+            ${NOTICE_GRAPHQL_FIELDS}
+          }
+        }
+      }`,
+      preview,
+      "notices"
+    ),
+    getAllNews(preview),
+  ]);
+
+  const current = extractNotice(currentResponse);
   const index = list.findIndex((item) => item.slug === slug);
-  const current = index >= 0 ? list[index] : null;
   const newer = index > 0 ? list[index - 1] : null;
   const older = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
 
