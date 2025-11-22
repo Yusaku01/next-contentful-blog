@@ -14,13 +14,14 @@ export default function CoverImage({
   url: string;
   slug?: string;
 }) {
+  const href = slug?.startsWith("/") ? slug : slug ? `/blog/${slug}` : undefined;
   const image = (
     <ContentfulImage
       alt={`Cover Image for ${title}`}
       priority
-      width={2000}
-      height={1000}
-      className={cn("shadow-small", {
+      width={1200}
+      height={630}
+      className={cn("shadow-small rounded-lg", {
         "hover:shadow-medium transition-shadow duration-200": slug,
       })}
       src={url}
@@ -29,8 +30,8 @@ export default function CoverImage({
 
   return (
     <div className="sm:mx-0">
-      {slug ? (
-        <Link href={`/posts/${slug}`} aria-label={title}>
+      {href ? (
+        <Link href={href} aria-label={title}>
           {image}
         </Link>
       ) : (

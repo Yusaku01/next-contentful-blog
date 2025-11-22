@@ -19,31 +19,29 @@ function PostPreview({
   slug: string;
 }) {
   return (
-    <div>
-      <div className="mb-5">
-        <CoverImage title={title} slug={slug} url={coverImage.url} />
+    <article className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+      <div className="mb-4 overflow-hidden rounded-lg">
+        <CoverImage title={title} slug={`/blog/${slug}`} url={coverImage.url} />
       </div>
-      <h3 className="text-3xl mb-3 leading-snug">
-        <Link href={`/posts/${slug}`} className="hover:underline">
+      <h3 className="text-xl font-semibold leading-snug mb-2">
+        <Link href={`/blog/${slug}`} className="hover:underline">
           {title}
         </Link>
       </h3>
-      <div className="text-lg mb-4">
+      <div className="text-xs text-gray-500 mb-3">
         <DateComponent dateString={date} />
       </div>
-      <p className="text-lg leading-relaxed mb-4">{excerpt}</p>
+      {excerpt && <p className="text-sm text-gray-700 mb-4 line-clamp-3">{excerpt}</p>}
       {author && <Avatar name={author.name} picture={author.picture} />}
-    </div>
+    </article>
   );
 }
 
 export default function MoreStories({ morePosts }: { morePosts: any[] }) {
   return (
-    <section>
-      <h2 className="mb-8 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">
-        More Stories
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-16 lg:gap-x-32 gap-y-20 md:gap-y-32 mb-32">
+    <section className="max-w-5xl mx-auto">
+      <h2 className="mb-6 text-2xl font-bold tracking-tight">More Stories</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-16">
         {morePosts.map((post) => (
           <PostPreview
             key={post.slug}

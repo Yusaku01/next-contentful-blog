@@ -1,3 +1,7 @@
+# このリポジトリについて（カスタム差分）
+
+このリポジトリは Next.js + Contentful の公式サンプルをベースに、ルートを `/blog` / `/blog/[slug]` と `/news` / `/news/[slug]` に再編し、トップページのヒーローやカード UI を追加しています。Contentful には従来の Post/Author に加え Notice（お知らせ）モデルを追加する運用を想定しています。以降の英語ドキュメントは元のサンプル手順ですが、ルートやモデルは上記の差分を前提に読み替えてください。
+
 # A statically generated blog example using Next.js and Contentful
 
 This example showcases Next.js's [Static Generation](https://nextjs.org/docs/basic-features/pages) feature using [Contentful](https://www.contentful.com/) as the data source.

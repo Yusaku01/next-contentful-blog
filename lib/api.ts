@@ -28,7 +28,34 @@ const POST_GRAPHQL_FIELDS = `
   }
 `;
 
-async function fetchGraphQL(query: string, preview = false): Promise<any> {
+const NOTICE_GRAPHQL_FIELDS = `
+  slug
+  title
+  coverImage: cover {
+    url
+  }
+  date
+  content {
+    json
+    links {
+      assets {
+        block {
+          sys {
+            id
+          }
+          url
+          description
+        }
+      }
+    }
+  }
+`;
+
+async function fetchGraphQL(
+  query: string,
+  preview = false,
+  tag = "posts"
+): Promise<any> {
   return fetch(
     `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
     {
@@ -42,8 +69,8 @@ async function fetchGraphQL(query: string, preview = false): Promise<any> {
         }`,
       },
       body: JSON.stringify({ query }),
-      next: { tags: ["posts"] },
-    },
+      next: { tags: [tag] },
+    }
   ).then((response) => response.json());
 }
 
@@ -53,6 +80,14 @@ function extractPost(fetchResponse: any): any {
 
 function extractPostEntries(fetchResponse: any): any[] {
   return fetchResponse?.data?.postCollection?.items ?? [];
+}
+
+function extractNotice(fetchResponse: any): any {
+  return fetchResponse?.data?.noticeCollection?.items?.[0];
+}
+
+function extractNoticeEntries(fetchResponse: any): any[] {
+  return fetchResponse?.data?.noticeCollection?.items ?? [];
 }
 
 export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
@@ -65,6 +100,7 @@ export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
       }
     }`,
     true,
+    "posts"
   );
   return extractPost(entry);
 }
@@ -81,40 +117,86 @@ export async function getAllPosts(isDraftMode: boolean): Promise<any[]> {
       }
     }`,
     isDraftMode,
+    "posts"
   );
   return extractPostEntries(entries);
 }
 
 export async function getPostAndMorePosts(
   slug: string,
-  preview: boolean,
+  preview: boolean
 ): Promise<any> {
   const entry = await fetchGraphQL(
     `query {
       postCollection(where: { slug: "${slug}" }, preview: ${
-        preview ? "true" : "false"
-      }, limit: 1) {
+      preview ? "true" : "false"
+    }, limit: 1) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
       }
     }`,
     preview,
+    "posts"
   );
   const entries = await fetchGraphQL(
     `query {
       postCollection(where: { slug_not_in: "${slug}" }, order: date_DESC, preview: ${
-        preview ? "true" : "false"
-      }, limit: 2) {
+      preview ? "true" : "false"
+    }, limit: 2) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
       }
     }`,
     preview,
+    "posts"
   );
   return {
     post: extractPost(entry),
     morePosts: extractPostEntries(entries),
   };
+}
+
+export async function getPostWithAdjacent(
+  slug: string,
+  preview: boolean
+): Promise<any> {
+  const list = await getAllPosts(preview);
+  const index = list.findIndex((item) => item.slug === slug);
+  const current = index >= 0 ? list[index] : null;
+  const newer = index > 0 ? list[index - 1] : null;
+  const older = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
+
+  return { post: current, newer, older };
+}
+
+export async function getAllNews(isDraftMode: boolean): Promise<any[]> {
+  const entries = await fetchGraphQL(
+    `query {
+      noticeCollection(where: { slug_exists: true }, order: date_DESC, preview: ${
+        isDraftMode ? "true" : "false"
+      }) {
+        items {
+          ${NOTICE_GRAPHQL_FIELDS}
+        }
+      }
+    }`,
+    isDraftMode,
+    "notices"
+  );
+  return extractNoticeEntries(entries);
+}
+
+export async function getNewsWithAdjacent(
+  slug: string,
+  preview: boolean
+): Promise<any> {
+  const list = await getAllNews(preview);
+  const index = list.findIndex((item) => item.slug === slug);
+  const current = index >= 0 ? list[index] : null;
+  const newer = index > 0 ? list[index - 1] : null;
+  const older = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
+
+  return { notice: current, newer, older };
 }

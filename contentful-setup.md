@@ -27,7 +27,7 @@ contentful space use --space-id 20dokcvnxg6z
 ```
 
 ## 3. モデルとダミーデータの投入
-1. モデルは `npm run setup`（= `node lib/setup.js`）で Author/Post を一括作成。
+1. モデルは `npm run setup`（= `node lib/setup.js`）で Author/Post を一括作成。**Notice（お知らせ）用モデルは現状 export に含まれていないため、Contentful 側で title/slug/date/content/coverImage を持つシンプルな content type を追加するか、export を拡張する必要があります。**
 2. ダミー記事を CLI で入れたい場合は、画像を `contentful-assets/dummy/` に保存して `lib/dummy-content.json` をインポート:
 ```bash
 contentful space import \
@@ -44,7 +44,7 @@ JSON には `sys.publishedVersion: 1` を含めておくと import と同時に 
 ```bash
 npm run dev
 ```
-- `/` と `/posts/[slug]` を確認
+- `/` と `/blog` / `/blog/[slug]`、`/news` / `/news/[slug]` を確認
 - Draft Mode: `/api/draft?secret=CONTENTFUL_PREVIEW_SECRET&slug=cli-post-one`
 - 問題なければ `npm run build` も実行
 
