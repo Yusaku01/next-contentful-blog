@@ -6,14 +6,14 @@ import { draftMode } from "next/headers";
 import Date from "../../date";
 import CoverImage from "../../cover-image";
 import { Markdown } from "@/lib/markdown";
-import { getAllNews, getNewsWithAdjacent } from "@/lib/api";
+import { getAllNewsEntries, getNewsWithAdjacent } from "@/lib/api";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
-  const allNews = await getAllNews(false);
+  const allNews = await getAllNewsEntries(false);
 
   return allNews.map((item) => ({
     slug: item.slug,

@@ -51,6 +51,18 @@ const NOTICE_GRAPHQL_FIELDS = `
   }
 `;
 
+// /news ページ用の軽量版（title, slug, date のみ）
+const NOTICE_LIST_FIELDS = `
+  slug
+  title
+  date
+`;
+
+type NewsPaginationOptions = {
+  limit?: number;
+  skip?: number;
+};
+
 async function fetchGraphQL(
   query: string,
   preview = false,
@@ -92,8 +104,19 @@ function extractNotice(fetchResponse: any): any {
   return fetchResponse?.data?.noticeCollection?.items?.[0];
 }
 
-function extractNoticeEntries(fetchResponse: any): any[] {
-  return fetchResponse?.data?.noticeCollection?.items ?? [];
+function extractNoticeCollection(fetchResponse: any): {
+  items: any[];
+  total: number;
+  limit: number;
+  skip: number;
+} {
+  const collection = fetchResponse?.data?.noticeCollection;
+  return {
+    items: collection?.items ?? [],
+    total: collection?.total ?? 0,
+    limit: collection?.limit ?? 0,
+    skip: collection?.skip ?? 0,
+  };
 }
 
 export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
@@ -177,48 +200,138 @@ export async function getPostWithAdjacent(
   return { post: current, newer, older };
 }
 
-export async function getAllNews(isDraftMode: boolean): Promise<any[]> {
+function normalizeNewsPagination(options: NewsPaginationOptions = {}) {
+  const limit = Math.max(1, Math.min(10, Math.floor(options.limit ?? 10)));
+  const skip = Math.max(0, Math.floor(options.skip ?? 0));
+  return { limit, skip };
+}
+
+export async function getPaginatedNews(
+  isDraftMode: boolean,
+  options: NewsPaginationOptions = {}
+): Promise<{ items: any[]; total: number; limit: number; skip: number }> {
+  const { limit, skip } = normalizeNewsPagination(options);
+
   const entries = await fetchGraphQL(
     `query {
-      noticeCollection(where: { slug_exists: true }, order: date_DESC, preview: ${
-        isDraftMode ? "true" : "false"
-      }) {
+      noticeCollection(
+        where: { slug_exists: true }
+        order: date_DESC
+        limit: ${limit}
+        skip: ${skip}
+        preview: ${isDraftMode ? "true" : "false"}
+      ) {
+        total
+        skip
+        limit
         items {
-          ${NOTICE_GRAPHQL_FIELDS}
+          ${NOTICE_LIST_FIELDS}
         }
       }
     }`,
     isDraftMode,
     "notices"
   );
-  return extractNoticeEntries(entries);
+
+  console.log("[getAllNews] Response:", JSON.stringify(entries, null, 2));
+
+  if (entries.errors) {
+    console.error("[getAllNews] GraphQL Errors:", entries.errors);
+  }
+
+  const { items, total, limit: responseLimit, skip: responseSkip } =
+    extractNoticeCollection(entries);
+
+  return {
+    items,
+    total,
+    limit: responseLimit || limit,
+    skip: responseSkip || skip,
+  };
+}
+
+export async function getAllNews(
+  isDraftMode: boolean,
+  options: NewsPaginationOptions = {}
+): Promise<any[]> {
+  const { items } = await getPaginatedNews(isDraftMode, options);
+  return items;
+}
+
+export async function getAllNewsEntries(
+  isDraftMode: boolean
+): Promise<any[]> {
+  const firstPage = await getPaginatedNews(isDraftMode, { limit: 10, skip: 0 });
+  const allItems = [...firstPage.items];
+  const total = firstPage.total ?? firstPage.items.length;
+  const limit = firstPage.limit || 10;
+
+  if (total <= limit) {
+    return allItems;
+  }
+
+  for (let offset = limit; offset < total; offset += limit) {
+    const page = await getPaginatedNews(isDraftMode, { limit, skip: offset });
+    allItems.push(...page.items);
+  }
+
+  return allItems;
 }
 
 export async function getNewsWithAdjacent(
   slug: string,
   preview: boolean
 ): Promise<any> {
-  const [currentResponse, list] = await Promise.all([
-    fetchGraphQL(
-      `query {
-        noticeCollection(where: { slug: "${slug}" }, preview: ${
-          preview ? "true" : "false"
-        }, limit: 1) {
-          items {
-            ${NOTICE_GRAPHQL_FIELDS}
-          }
+  const currentResponse = await fetchGraphQL(
+    `query {
+      noticeCollection(where: { slug: "${slug}" }, preview: ${
+      preview ? "true" : "false"
+    }, limit: 1) {
+        items {
+          ${NOTICE_GRAPHQL_FIELDS}
         }
-      }`,
-      preview,
-      "notices"
-    ),
-    getAllNews(preview),
-  ]);
+      }
+    }`,
+    preview,
+    "notices"
+  );
 
-  const current = extractNotice(currentResponse);
-  const index = list.findIndex((item) => item.slug === slug);
-  const newer = index > 0 ? list[index - 1] : null;
-  const older = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
+  const notice = extractNotice(currentResponse);
 
-  return { notice: current, newer, older };
+  if (!notice?.date) {
+    return { notice: null, newer: null, older: null };
+  }
+
+  const normalizedDate = new Date(notice.date).toISOString();
+  const adjacentResponse = await fetchGraphQL(
+    `query {
+      newer: noticeCollection(
+        where: { date_gt: "${normalizedDate}" }
+        order: date_ASC
+        limit: 1
+        preview: ${preview ? "true" : "false"}
+      ) {
+        items {
+          ${NOTICE_LIST_FIELDS}
+        }
+      }
+      older: noticeCollection(
+        where: { date_lt: "${normalizedDate}" }
+        order: date_DESC
+        limit: 1
+        preview: ${preview ? "true" : "false"}
+      ) {
+        items {
+          ${NOTICE_LIST_FIELDS}
+        }
+      }
+    }`,
+    preview,
+    "notices"
+  );
+
+  const newer = adjacentResponse?.data?.newer?.items?.[0] ?? null;
+  const older = adjacentResponse?.data?.older?.items?.[0] ?? null;
+
+  return { notice, newer, older };
 }
