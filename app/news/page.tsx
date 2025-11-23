@@ -13,10 +13,11 @@ export const metadata = {
 export default async function NewsPage({
   searchParams,
 }: {
-  searchParams?: { page?: string };
+  searchParams?: Promise<{ page?: string }>;
 }) {
   const { isEnabled } = await draftMode();
-  const pageParam = Number.parseInt(searchParams?.page ?? "1", 10);
+  const params = await searchParams;
+  const pageParam = Number.parseInt(params?.page ?? "1", 10);
   const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 10;
   const skip = (currentPage - 1) * pageSize;
