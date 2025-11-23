@@ -191,6 +191,13 @@ export async function getAllNews(isDraftMode: boolean): Promise<any[]> {
     isDraftMode,
     "notices"
   );
+
+  console.log('[getAllNews] Response:', JSON.stringify(entries, null, 2));
+
+  if (entries.errors) {
+    console.error('[getAllNews] GraphQL Errors:', entries.errors);
+  }
+
   return extractNoticeEntries(entries);
 }
 
