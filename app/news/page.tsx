@@ -1,21 +1,44 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { draftMode } from "next/headers";
 
 import Date from "../date";
-import { getAllNews } from "@/lib/api";
+import { getPaginatedNews } from "@/lib/api";
 
 export const metadata = {
   title: "お知らせ",
   description: "お知らせ一覧",
 };
 
-export default async function NewsPage() {
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
   const { isEnabled } = await draftMode();
-  const notices = await getAllNews(isEnabled);
+  const pageParam = Number.parseInt(searchParams?.page ?? "1", 10);
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+  const pageSize = 10;
+  const skip = (currentPage - 1) * pageSize;
 
-  console.log('[/news] draft mode:', isEnabled);
-  console.log('[/news] notices count:', notices.length);
-  console.log('[/news] notices:', JSON.stringify(notices, null, 2));
+  const { items: notices, total } = await getPaginatedNews(isEnabled, {
+    limit: pageSize,
+    skip,
+  });
+
+  const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
+  if (total > 0 && currentPage > totalPages) {
+    notFound();
+  }
+
+  const hasPrev = currentPage > 1;
+  const hasNext = currentPage < totalPages;
+  const buildPageLink = (page: number) =>
+    page <= 1 ? "/news" : `/news?page=${page}`;
+
+  console.log("[/news] draft mode:", isEnabled);
+  console.log("[/news] notices count:", notices.length);
+  console.log("[/news] notices:", JSON.stringify(notices, null, 2));
 
   if (notices.length === 0) {
     return (
@@ -54,7 +77,34 @@ export default async function NewsPage() {
           </Link>
         ))}
       </div>
+
+      <div className="max-w-3xl mx-auto mt-6 flex items-center justify-between text-sm text-gray-700">
+        {hasPrev ? (
+          <Link
+            href={buildPageLink(currentPage - 1)}
+            className="text-blue-600 hover:underline"
+          >
+            前の10件
+          </Link>
+        ) : (
+          <span className="text-gray-400">前の10件</span>
+        )}
+
+        <span>
+          {currentPage} / {totalPages} ページ
+        </span>
+
+        {hasNext ? (
+          <Link
+            href={buildPageLink(currentPage + 1)}
+            className="text-blue-600 hover:underline"
+          >
+            次の10件
+          </Link>
+        ) : (
+          <span className="text-gray-400">次の10件</span>
+        )}
+      </div>
     </div>
   );
 }
-

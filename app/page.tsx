@@ -9,7 +9,7 @@ export default async function Page() {
   const { isEnabled } = await draftMode();
   const [posts, news] = await Promise.all([
     getAllPosts(isEnabled),
-    getAllNews(isEnabled),
+    getAllNews(isEnabled, { limit: 10 }),
   ]);
 
   const latestPosts = posts.slice(0, 3);
