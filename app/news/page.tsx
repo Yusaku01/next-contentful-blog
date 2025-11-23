@@ -13,6 +13,24 @@ export default async function NewsPage() {
   const { isEnabled } = await draftMode();
   const notices = await getAllNews(isEnabled);
 
+  console.log('[/news] draft mode:', isEnabled);
+  console.log('[/news] notices count:', notices.length);
+  console.log('[/news] notices:', JSON.stringify(notices, null, 2));
+
+  if (notices.length === 0) {
+    return (
+      <div className="container mx-auto px-5 pb-16">
+        <header className="max-w-3xl mx-auto mb-8">
+          <h1 className="text-3xl font-bold">News</h1>
+          <p className="text-sm text-gray-600">シンプルにタイトルと日付のみを表示します。</p>
+        </header>
+        <div className="max-w-3xl mx-auto">
+          <p className="text-gray-500">お知らせがまだありません。</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-5 pb-16">
       <header className="max-w-3xl mx-auto mb-8">
