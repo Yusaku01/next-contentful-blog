@@ -51,6 +51,13 @@ const NOTICE_GRAPHQL_FIELDS = `
   }
 `;
 
+// /news ページ用の軽量版（title, slug, date のみ）
+const NOTICE_LIST_FIELDS = `
+  slug
+  title
+  date
+`;
+
 async function fetchGraphQL(
   query: string,
   preview = false,
@@ -180,11 +187,11 @@ export async function getPostWithAdjacent(
 export async function getAllNews(isDraftMode: boolean): Promise<any[]> {
   const entries = await fetchGraphQL(
     `query {
-      noticeCollection(where: { slug_exists: true }, order: date_DESC, preview: ${
+      noticeCollection(where: { slug_exists: true }, order: date_DESC, limit: 100, preview: ${
         isDraftMode ? "true" : "false"
       }) {
         items {
-          ${NOTICE_GRAPHQL_FIELDS}
+          ${NOTICE_LIST_FIELDS}
         }
       }
     }`,
