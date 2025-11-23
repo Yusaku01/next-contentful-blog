@@ -31,7 +31,7 @@ const POST_GRAPHQL_FIELDS = `
 const NOTICE_GRAPHQL_FIELDS = `
   slug
   title
-  coverImage: cover {
+  coverImage {
     url
   }
   date
