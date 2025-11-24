@@ -43,16 +43,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       url: `/blog/${slug}`,
       publishedTime: post.date,
-      images: post.coverImage
-        ? [
-            {
-              url: post.coverImage.url,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : undefined,
     },
   };
 }

@@ -44,16 +44,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       url: `/news/${slug}`,
       publishedTime: notice.date,
-      images: notice.coverImage
-        ? [
-            {
-              url: notice.coverImage.url,
-              width: 1200,
-              height: 630,
-              alt: notice.title,
-            },
-          ]
-        : undefined,
     },
   };
 }
