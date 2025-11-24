@@ -45,7 +45,7 @@ JSON には `sys.publishedVersion: 1` を含めておくと import と同時に 
 npm run dev
 ```
 - `/` と `/blog` / `/blog/[slug]`、`/news` / `/news/[slug]` を確認
-- Draft Mode: `/api/draft?secret=CONTENTFUL_PREVIEW_SECRET&slug=cli-post-one`
+- Draft Mode (ローカル例): `/api/draft?path=/blog/cli-post-one&x-contentful-preview-secret=CONTENTFUL_PREVIEW_SECRET`
 - 問題なければ `npm run build` も実行
 
 ## 5. Vercel デプロイ
@@ -85,3 +85,18 @@ curl -X POST https://api.contentful.com/spaces/20dokcvnxg6z/webhook_definitions 
 - [x] Webhook で `/api/revalidate` を登録し Publish 時に動くか確認
 
 メモ: `contentful-data.md` に CLI 実行ログ、`lib/dummy-content.json` に seed データが残っているので追加データ投入時に再利用可能。
+
+## 8. プレビュー (Draft Mode) 設定と動作
+- 使う環境変数: `CONTENTFUL_PREVIEW_SECRET`（任意のシークレット）、`CONTENTFUL_PREVIEW_ACCESS_TOKEN`（Contentful Preview API）、`CONTENTFUL_SPACE_ID`/`CONTENTFUL_ACCESS_TOKEN`（通常取得用）。Vercelにも同じ値を入れてから再デプロイする。
+- シークレット発行例: `openssl rand -hex 32` または `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. 出力した文字列をそのまま `CONTENTFUL_PREVIEW_SECRET` とする（短くしても速度は変わらないので十分長い値推奨）。
+- Contentful の「Open preview」に設定するURL（ブログ/お知らせそれぞれ登録）:
+  - ブログ: `https://<vercel-domain>/api/draft?path=/blog/{entry.fields.slug}&x-contentful-preview-secret=CONTENTFUL_PREVIEW_SECRET`
+  - お知らせ: `https://<vercel-domain>/api/draft?path=/news/{entry.fields.slug}&x-contentful-preview-secret=CONTENTFUL_PREVIEW_SECRET`
+  - ローカル確認用: `http://localhost:3000/api/draft?path=/blog/{entry.fields.slug}&x-contentful-preview-secret=CONTENTFUL_PREVIEW_SECRET`
+- 動作の流れ:
+  - `/api/draft`（`@contentful/vercel-nextjs-toolkit`）がシークレットを検証し、Draft Mode クッキーをセットして `path` へ 307 リダイレクト。
+  - 各ページで `draftMode().isEnabled` を参照し、`lib/api.ts` が Delivery API / Preview API を切り替えて未公開のドラフトを取得。Draft Mode 中はリクエスト時に動的レンダリングされる。
+  - 終了は `/api/disable-draft` へアクセス。
+- セキュリティ:
+  - `CONTENTFUL_PREVIEW_SECRET` が漏れると誰でもドラフトを閲覧できるため、長いランダム値＋HTTPSで管理し、必要に応じて定期ローテーション。
+  - 追加で Vercel の Deployment Protection を使う場合は `VERCEL_AUTOMATION_BYPASS_SECRET` と `x-vercel-protection-bypass` を併用して二段階チェックにできる。
