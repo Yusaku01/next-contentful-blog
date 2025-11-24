@@ -233,8 +233,6 @@ export async function getPaginatedNews(
     "notices"
   );
 
-  console.log("[getAllNews] Response:", JSON.stringify(entries, null, 2));
-
   if (entries.errors) {
     console.error("[getAllNews] GraphQL Errors:", entries.errors);
   }
