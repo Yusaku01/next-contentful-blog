@@ -1,4 +1,4 @@
-export const revalidate = 0;
+// export const revalidate = 0;
 
 import type { MetadataRoute } from "next";
 import { getAllNewsEntries, getAllPosts } from "@/lib/api";
