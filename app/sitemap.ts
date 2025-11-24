@@ -1,8 +1,11 @@
-import type { MetadataRoute } from "next";
+export const revalidate = 0;
 
+import type { MetadataRoute } from "next";
 import { getAllNewsEntries, getAllPosts } from "@/lib/api";
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, news] = await Promise.all([
