@@ -28,10 +28,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {};
   }
 
-  const description = notice.content?.json ? "お知らせ記事" : undefined;
+  const description =
+    notice.excerpt ||
+    (notice.content?.json ? "お知らせ記事" : undefined);
 
   return {
-    title: notice.title,
+    title: `${notice.title} | お知らせ`,
     description,
     alternates: {
       canonical: `/news/${slug}`,

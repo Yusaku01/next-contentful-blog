@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = post.excerpt || "ブログ記事";
 
   return {
-    title: post.title,
+    title: `${post.title} | ブログ`,
     description,
     alternates: {
       canonical: `/blog/${slug}`,

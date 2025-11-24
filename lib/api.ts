@@ -35,6 +35,7 @@ const NOTICE_GRAPHQL_FIELDS = `
     url
   }
   date
+  excerpt
   content {
     json
     links {
