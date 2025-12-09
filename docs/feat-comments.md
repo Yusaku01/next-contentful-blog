@@ -6,6 +6,12 @@ TanStack Query を最小限に入れて、コメントの取得・投稿だけ�
 - パッケージ: `npm install @tanstack/react-query`
 - 追加で使うなら: `@tanstack/react-query-devtools`（任意）
 - `.env.local` に Contentful の管理トークンが必要（コメント作成で CMA を使うため）。
+  - `CONTENTFUL_SPACE_ID`
+  - `CONTENTFUL_ACCESS_TOKEN`（読み取り・CDA）
+  - `CONTENTFUL_MANAGEMENT_TOKEN`（書き込み・CMA）
+  - `CONTENTFUL_ENVIRONMENT`（任意, 既定値 `master`）
+  - `CONTENTFUL_DEFAULT_LOCALE`（任意, 既定値 `en-US`）
+  - `CONTENTFUL_COMMENT_CONTENT_TYPE`（任意, 既定値 `comment`）
 
 ## Contentful 側の準備
 1. Content Model で `Comment` コンテンツタイプを作成  
@@ -70,6 +76,11 @@ app/
 lib/
   api.ts                        # （任意）コメント fetch/post helper を追加してもよい
 ```
+
+## このリポジトリで追加済みの実装
+- `app/api/comments/route.ts` で Contentful CMA に投稿・公開し、CDA で取得（クライアントにはトークンを露出しない）。  
+- `app/providers.tsx` + `app/layout.tsx` で React Query の Provider を追加。  
+- `app/blog/[slug]/Comments.tsx` を blog 詳細に組み込み、`/api/comments` に対する Query/Mutation を実装。  
 
 ## 動作確認の流れ（最小）
 1. `.env.local` に CMA トークンを入れる。  

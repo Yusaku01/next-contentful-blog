@@ -8,6 +8,7 @@ import Date from "../../date";
 import CoverImage from "../../cover-image";
 import { Markdown } from "@/lib/markdown";
 import { getAllPosts, getPostWithAdjacent } from "@/lib/api";
+import { Comments } from "./Comments";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -88,6 +89,10 @@ export default async function PostPage({ params }: Props) {
         <article className="prose prose-neutral max-w-none">
           <Markdown content={post.content} />
         </article>
+
+        <div className="mt-10">
+          <Comments slug={slug} />
+        </div>
 
         <nav className="mt-10 border-t border-gray-200 pt-6 flex flex-col gap-3 text-sm">
           {newer && (
