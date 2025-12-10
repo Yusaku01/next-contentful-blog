@@ -9,7 +9,7 @@ type ImageField = {
 
 type Author = {
 	name: string;
-	picture: ImageField;
+	picture?: ImageField | null;
 };
 
 type PostPreviewData = {
