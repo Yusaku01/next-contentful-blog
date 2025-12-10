@@ -1,3 +1,5 @@
+import type { Document } from "@contentful/rich-text-types";
+
 const POST_GRAPHQL_FIELDS = `
   slug
   title
@@ -113,7 +115,14 @@ type GraphqlResponse = {
 			limit?: number;
 			skip?: number;
 		};
+		newer?: {
+			items?: Notice[];
+		};
+		older?: {
+			items?: Notice[];
+		};
 	};
+	errors?: unknown;
 };
 
 type NewsPaginationOptions = {
@@ -403,4 +412,3 @@ export async function getNewsWithAdjacent(
 
 	return { notice, newer, older };
 }
-import type { Document } from "@contentful/rich-text-types";

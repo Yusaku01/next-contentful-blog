@@ -41,7 +41,7 @@ function RichTextAsset({
 export function Markdown({ content }: { content: Content }) {
 	return documentToReactComponents(content.json, {
 		renderNode: {
-			[BLOCKS.EMBEDDED_ASSET]: (node: Block) => {
+			[BLOCKS.EMBEDDED_ASSET]: (node) => {
 				const assetId =
 					typeof node.data === "object" && node.data?.target?.sys?.id;
 				if (!assetId) return null;
