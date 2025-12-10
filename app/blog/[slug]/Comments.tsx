@@ -51,7 +51,15 @@ export function Comments({ slug }: { slug: string }) {
 
   const mutation = useMutation({
     mutationFn: postComment,
-    onSuccess: () => {
+    onSuccess: (newComment) => {
+      // Optimistically reflect the new comment for better UX while we refetch.
+      queryClient.setQueryData<{ items: Comment[] }>(
+        ["comments", slug],
+        (prev) => {
+          if (!prev) return { items: [newComment] };
+          return { items: [...prev.items, newComment] };
+        }
+      );
       queryClient.invalidateQueries({ queryKey: ["comments", slug] });
       setBody("");
     },
