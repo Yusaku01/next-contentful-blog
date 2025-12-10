@@ -86,9 +86,11 @@ export default async function PostPage({ params }: Props) {
 					</div>
 				)}
 
-				<article className="prose prose-neutral max-w-none">
-					<Markdown content={post.content} />
-				</article>
+				{post.content && (
+					<article className="prose prose-neutral max-w-none">
+						<Markdown content={post.content} />
+					</article>
+				)}
 
 				<div className="mt-10">
 					<Comments slug={slug} />
