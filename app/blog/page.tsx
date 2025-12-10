@@ -30,11 +30,13 @@ export default async function BlogPage() {
 						className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
 					>
 						<div className="mb-4 overflow-hidden rounded-lg">
-							<CoverImage
-								title={post.title}
-								slug={post.slug}
-								url={post.coverImage.url}
-							/>
+							{post.coverImage?.url && (
+								<CoverImage
+									title={post.title}
+									slug={post.slug}
+									url={post.coverImage.url}
+								/>
+							)}
 						</div>
 						<h2 className="text-xl font-semibold leading-snug mb-2">
 							<Link href={`/blog/${post.slug}`} className="hover:underline">
