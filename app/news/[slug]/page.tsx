@@ -79,9 +79,11 @@ export default async function NewsDetailPage({ params }: Props) {
 					</div>
 				)}
 
-				<article className="prose prose-neutral max-w-none">
-					<Markdown content={notice.content} />
-				</article>
+				{notice.content && (
+					<article className="prose prose-neutral max-w-none">
+						<Markdown content={notice.content} />
+					</article>
+				)}
 
 				<nav className="mt-10 border-t border-gray-200 pt-6 flex flex-col gap-3 text-sm">
 					{newer && (

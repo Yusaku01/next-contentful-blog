@@ -57,11 +57,13 @@ export default async function Page() {
 							className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:-translate-y-1 hover:shadow-md transition"
 						>
 							<div className="mb-3 overflow-hidden rounded-lg">
-								<CoverImage
-									title={post.title}
-									slug={post.slug}
-									url={post.coverImage.url}
-								/>
+								{post.coverImage?.url && (
+									<CoverImage
+										title={post.title}
+										slug={post.slug}
+										url={post.coverImage.url}
+									/>
+								)}
 							</div>
 							<h3 className="text-base font-semibold leading-snug mb-1">
 								<Link href={`/blog/${post.slug}`} className="hover:underline">

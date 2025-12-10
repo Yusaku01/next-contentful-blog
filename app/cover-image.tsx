@@ -42,7 +42,7 @@ export default function CoverImage({
 			width={1200}
 			height={630}
 			className={cn("shadow-small rounded-lg", {
-				"hover:shadow-medium transition-shadow duration-200": slug,
+				"hover:shadow-medium transition-shadow duration-200": Boolean(slug),
 			})}
 			src={url}
 		/>
