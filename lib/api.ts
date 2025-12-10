@@ -75,7 +75,7 @@ type RichTextAsset = {
 };
 
 type RichTextContent = {
-	json: unknown;
+	json: Document;
 	links: {
 		assets: {
 			block: RichTextAsset[];
@@ -403,3 +403,4 @@ export async function getNewsWithAdjacent(
 
 	return { notice, newer, older };
 }
+import type { Document } from "@contentful/rich-text-types";
